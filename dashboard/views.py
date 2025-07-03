@@ -75,16 +75,16 @@ def assign_files(request):
 @login_required
 def user_page(request, profile_id):
     profile = get_object_or_404(UserProfile, id=profile_id)
-    user_files = File.objects.filter(user=profile.user)
+    user_files = File.objects.filter(profiles=profile)
     
     # Handle user profile form
     if request.method == 'POST' and 'edit_profile' in request.POST:
         form = UserProfileForm(request.POST, instance=profile)
         if form.is_valid():
             form.save()
-            return redirect('user_page', username=username)
+            return redirect('dashboard:user_page', profile_id=profile_id)
     else:
-        form = UserProfileForm(instance=user)
+        form = UserProfileForm(instance=profile)
     
     # Handle file status updates
     if request.method == 'POST':
@@ -94,11 +94,11 @@ def user_page(request, profile_id):
             if new_status in dict(File.STATUS_CHOICES):
                 file.status = new_status
                 file.save()
-        return redirect('user_page', username=username)
+        return redirect('user_page', profile_id=profile_id)
 
     return render(request, 'dashboard/user_dashboard.html', {
         'files': user_files,
-        'user': user,
-        'all_users': User.objects.all(),
+        'profile': profile,
+        'all_profiles': UserProfile.objects.all(),
         'profile_form': form
     })

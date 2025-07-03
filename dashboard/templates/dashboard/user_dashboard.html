@@ -75,19 +75,69 @@
             margin-top: 1rem;
         }
 
-        .member-btn {
+        .profile-card {
+            margin-bottom: 1rem;
+            width: 100%;
+        }
+
+        .profile-btn {
             width: 100%;
             padding: 1rem;
             border: none;
-            border-radius: 12px;
+            border-radius: 16px;
             background: white;
             cursor: pointer;
             transition: all 0.2s ease;
-            font-weight: 500;
-            color: #4a5568;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            text-align: left;
-            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .profile-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .profile-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+
+        .avatar-initials {
+            color: white;
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+
+        .profile-details {
+            flex: 1;
+        }
+
+        .profile-details h3 {
+            margin: 0;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .profile-details p {
+            margin: 0.25rem 0;
+            font-size: 0.875rem;
+            color: #64748b;
         }
 
         .member-btn:hover {
@@ -582,17 +632,26 @@
                     <h2>Team Members</h2>
                     <div class="members-list">
                         {% for profile in all_profiles %}
-                            <button class="member-btn" onclick="window.location.href=`/user/${profile.id}/`">
-                                <div class="member-info">
-                                    <span class="member-name">{{ profile.first_name }} {{ profile.last_name }}</span>
-                                    <span class="member-email">{{ profile.email }}</span>
-                                    <span class="member-phone">{{ profile.phone_number }}</span>
-                                </div>
-                            </button>
+                            <div class="profile-card">
+                                <button class="profile-btn" onclick="window.location.href=`{% url 'dashboard:user_page' profile_id=profile.id %}`">
+                                    <div class="profile-info">
+                                        <div class="profile-avatar">
+                                            <span class="avatar-initials">
+                                                {{ profile.first_name|slice:':1' }}{{ profile.last_name|slice:':1' }}
+                                            </span>
+                                        </div>
+                                        <div class="profile-details">
+                                            <h3>{{ profile.first_name }} {{ profile.last_name }}</h3>
+                                            <p class="email">{{ profile.email }}</p>
+                                            <p class="phone">{{ profile.phone_number }}</p>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
                         {% endfor %}
                     </div>
                 <!-- Profile Edit Section -->
-                {% if user %}
+                {% if profile %}
                 <div class="profile-edit-section">
                     <h3>Edit Profile</h3>
                     <form method="post" class="profile-form">
