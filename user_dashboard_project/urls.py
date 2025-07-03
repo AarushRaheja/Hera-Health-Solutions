@@ -5,11 +5,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.http import HttpResponse
 
-def home(request):
-    return HttpResponse("Welcome! Go to /dashboard/")
+
 
 urlpatterns = [
-    path('', home),
     path('admin/', admin.site.urls),
     path('', include('dashboard.urls')),
     path('accounts/', include('django.contrib.auth.urls')),

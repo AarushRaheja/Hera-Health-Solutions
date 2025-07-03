@@ -71,19 +71,13 @@
             backdrop-filter: blur(10px);
         }
 
-        .user-list {
-            list-style: none;
+        .members-list {
             margin-top: 1rem;
         }
 
-        .user-list li {
-            padding: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .user-btn {
+        .member-btn {
             width: 100%;
-            padding: 1rem 1.25rem;
+            padding: 1rem;
             border: none;
             border-radius: 12px;
             background: white;
@@ -92,38 +86,29 @@
             font-weight: 500;
             color: #4a5568;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
             text-align: left;
+            margin-bottom: 0.5rem;
         }
 
-        .user-btn:hover {
+        .member-btn:hover {
             background: #f8fafc;
             transform: translateY(-1px);
         }
 
-        .user-list li:before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #e2e8f0;
-            transition: all 0.2s ease;
+        .member-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
         }
 
-        .user-list li:hover {
-            transform: translateY(-1px);
-            box-shadow:
-                0 4px 6px -1px rgba(0, 0, 0, 0.05),
-                0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        .member-name {
+            font-weight: 600;
+            color: #1a1a1a;
         }
 
-        .user-list li.active .user-btn {
-            background: #2563eb;
-            color: white;
-            border-left: 4px solid #1d4ed8;
+        .member-email, .member-phone {
+            font-size: 0.875rem;
+            color: #64748b;
         }
 
         .user-list li.active .user-btn:before {
@@ -519,56 +504,93 @@
             background: #f8fafc;
         }
 
-        .selected-files {
-            margin-top: 1rem;
-            max-height: 200px;
-            overflow-y: auto;
-        }
+            .selected-files {
+                margin-top: 1rem;
+                max-height: 200px;
+                overflow-y: auto;
+            }
 
-        .assignment-container {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-top: 1rem;
-        }
+            .assignment-container {
+                max-height: 300px;
+                overflow-y: auto;
+                margin-top: 1rem;
+            }
 
-        .assignment-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            padding: 1rem;
-            background: #f8fafc;
-            border-radius: 12px;
-            margin-bottom: 0.5rem;
-        }
+            .assignment-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+                padding: 1rem;
+                background: #f8fafc;
+                border-radius: 12px;
+                margin-bottom: 0.5rem;
+            }
 
-        .assignment-row select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>File Management Dashboard</h1>
-       
-        <div class="grid">
-            <!-- User Selection Panel -->
-            <div class="user-panel">
-                <h2>Team Members</h2>
-                <ul class="user-list">
-                    {% for user in all_users %}
-                    <li {% if user.username == request.resolver_match.kwargs.username %}class="active"{% endif %}>
-                        <button data-url="{% url 'user_page' user.username %}" 
-                                class="user-btn {% if user.username == request.resolver_match.kwargs.username %}active{% endif %}" 
-                                onclick="window.location.href=this.getAttribute('data-url')">
-                            {{ user.get_full_name|default:user.username }}
-                        </button>
-                    </li>
-                    {% endfor %}
-                </ul>
+            .assignment-row select {
+                width: 100%;
+                padding: 0.75rem;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+            }
 
+            .user-panel {
+                margin-top: 2rem;
+            }
+
+            .members-list {
+                margin-top: 1rem;
+            }
+
+            .member-btn {
+                background: none;
+                border: none;
+                padding: 0.5rem;
+                cursor: pointer;
+                display: block;
+                width: 100%;
+                text-align: left;
+            }
+
+            .member-info {
+                padding: 0.5rem;
+                border-bottom: 1px solid #e5e7eb;
+            }
+
+            .member-name {
+                font-weight: 500;
+                font-size: 0.875rem;
+            }
+
+            .member-email {
+                font-size: 0.75rem;
+                color: #6b7280;
+            }
+
+            .member-phone {
+                font-size: 0.75rem;
+                color: #6b7280;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>File Management Dashboard</h1>
+           
+            <div class="grid">
+                <!-- User Selection Panel -->
+                <div class="user-panel">
+                    <h2>Team Members</h2>
+                    <div class="members-list">
+                        {% for profile in all_profiles %}
+                            <button class="member-btn" onclick="window.location.href=`/user/${profile.id}/`">
+                                <div class="member-info">
+                                    <span class="member-name">{{ profile.first_name }} {{ profile.last_name }}</span>
+                                    <span class="member-email">{{ profile.email }}</span>
+                                    <span class="member-phone">{{ profile.phone_number }}</span>
+                                </div>
+                            </button>
+                        {% endfor %}
+                    </div>
                 <!-- Profile Edit Section -->
                 {% if user %}
                 <div class="profile-edit-section">
@@ -840,10 +862,9 @@
                 row.innerHTML = `
                     <div class="file-name">${fileName}</div>
                     <select multiple>
-                        <option value="john">John Doe</option>
-                        <option value="jane">Jane Smith</option>
-                        <option value="mike">Mike Johnson</option>
-                        <option value="sarah">Sarah Williams</option>
+                        {% for profile in all_profiles %}
+                        <option value="{{ profile.id }}">{{ profile.first_name }} {{ profile.last_name }}</option>
+                        {% endfor %}
                     </select>
                 `;
                 container.appendChild(row);
@@ -857,8 +878,29 @@
             }));
            
             console.log('Assignments:', assignments);
-            closeAddFilesModal();
-            alert('Files assigned successfully!');
+            
+            // Send assignments to server
+            fetch('/api/assign-files/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({ assignments: assignments })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    closeAddFilesModal();
+                    alert('Files assigned successfully!');
+                } else {
+                    alert('Error assigning files: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while assigning files.');
+            });
         }   
     </script>   
 </body>
