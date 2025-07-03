@@ -370,6 +370,80 @@
             padding-right: 0.5rem;
         }
 
+        /* Profile Edit Section */
+        .profile-edit-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .profile-edit-section h3 {
+            font-size: 1.125rem;
+            color: #1f2937;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.75rem;
+        }
+
+        .profile-form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .profile-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #4b5563;
+            font-weight: 500;
+        }
+
+        .profile-form .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #f9fafb;
+            color: #1f2937;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .profile-form .form-control:focus {
+            outline: none;
+            border-color: #2563eb;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .profile-form .btn-primary {
+            background: #2563eb;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .profile-form .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .profile-form .btn-primary::after {
+            content: '→';
+            font-size: 0.875rem;
+        }
+
         .file-card {
             background: white;
             border: 1px solid #e5e7eb;
@@ -494,6 +568,18 @@
                     </li>
                     {% endfor %}
                 </ul>
+
+                <!-- Profile Edit Section -->
+                {% if user %}
+                <div class="profile-edit-section">
+                    <h3>Edit Profile</h3>
+                    <form method="post" class="profile-form">
+                        {% csrf_token %}
+                        {{ profile_form.as_p }}
+                        <button type="submit" name="edit_profile" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+                {% endif %}
             </div>
 
             <!-- Main Content Area -->
