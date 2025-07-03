@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - File Access Management</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <style>
+        /* Modern CSS Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background: linear-gradient(135deg, #f6f8fd 0%, #f1f4f9 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 24px;
+            box-shadow:
+                0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06),
+                0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+            backdrop-filter: blur(10px);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2.5rem;
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 2rem;
+            letter-spacing: -0.025em;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.025em;
+        }
+
+        /* User Selection Panel */
+        .user-panel {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow:
+                0 4px 6px -1px rgba(0, 0, 0, 0.05),
+                0 2px 4px -1px rgba(0, 0, 0, 0.03),
+                0 0 0 1px rgba(255, 255, 255, 0.7) inset;
+            backdrop-filter: blur(10px);
+        }
+
+        .user-list {
+            list-style: none;
+            margin-top: 1rem;
+        }
+
+        .user-list li {
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            background: white;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            color: #4a5568;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-list li:before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .user-list li:hover {
+            transform: translateY(-1px);
+            box-shadow:
+                0 4px 6px -1px rgba(0, 0, 0, 0.05),
+                0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        .user-list li.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        .user-list li.active:before {
+            background: white;
+        }
+
+        /* File Management */
+        .file-list {
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .file-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .file-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .file-list::-webkit-scrollbar-thumb {
+            background: #c5c5c5;
+            border-radius: 4px;
+        }
+
+        .file-list::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem;
+            background: white;
+            margin-bottom: 1rem;
+            border-radius: 16px;
+            transition: all 0.2s ease;
+            box-shadow:
+                0 1px 3px rgba(0,0,0,0.05),
+                0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .file-item:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .file-name {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 500;
+        }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            background: #f3f4f6;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: #6b7280;
+        }
+
+        /* Status Indicators */
+        .status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-right: 1rem;
+        }
+
+        .status-not-started {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .status-in-progress {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-complete {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .btn-view {
+            background: #f8fafc;
+            color: #2563eb;
+            border: 1px solid #e2e8f0;
+            padding: 0.5rem 1rem;
+        }
+
+        .btn-view:hover {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        /* Modal Styles - Updated */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 0.5rem;
+            border-radius: 50%;
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 1rem;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-weight: 500;
+            color: #6b7280;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .tab-btn.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* File Grid */
+        .existing-files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .file-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .file-card.selected {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .file-card-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-card-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #1f2937;
+            word-break: break-word;
+        }
+
+        .file-card-info {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            padding-left: 2.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 0.875rem;
+        }
+
+        .search-bar svg {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+
+        /* Upload Area */
+        .file-upload-area {
+            border: 2px dashed #e5e7eb;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .file-upload-area:hover {
+            border-color: #2563eb;
+            background: #f8fafc;
+        }
+
+        .selected-files {
+            margin-top: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .assignment-container {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        .assignment-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+        }
+
+        .assignment-row select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>File Management Dashboard</h1>
+       
+        <div class="grid">
+            <!-- User Selection Panel -->
+            <div class="user-panel">
+                <h2>Team Members</h2>
+                <ul class="user-list">
+                    <li class="active">John Doe</li>
+                    <li>Jane Smith</li>
+                    <li>Mike Johnson</li>
+                    <li>Sarah Williams</li>
+                </ul>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="content-area">
+                <div class="file-management">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                        <h2 style="margin: 0;">Assigned Files</h2>
+                        <button class="btn btn-primary" onclick="openAddFilesModal()">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Add New Files
+                        </button>
+                    </div>
+                   
+                    <div class="file-list">
+                        <!-- Existing file items -->
+                        <div class="file-item">
+                            <div class="file-name">
+                                <div class="file-icon">📄</div>
+                                <span>project_requirements.pdf</span>
+                            </div>
+                            <div class="file-actions">
+                                <span class="status status-complete">Complete</span>
+                                <button class="btn btn-view">View File</button>
+                            </div>
+                        </div>
+                       
+                        <!-- Add more file items as needed -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Files Modal -->
+    <div id="addFilesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Files</h2>
+                <button class="modal-close" onclick="closeAddFilesModal()">&times;</button>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('existing')">Existing Files</button>
+                <button class="tab-btn" onclick="switchTab('upload')">Upload New Files</button>
+            </div>
+
+            <div id="existingFilesTab" class="tab-content active">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search files..." onkeyup="searchFiles(this.value)">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+                <div class="existing-files-grid">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div id="uploadFilesTab" class="tab-content">
+                <div class="file-upload-area" id="dropZone">
+                    <input type="file" id="fileUpload" multiple style="display: none">
+                    <svg width="40" height="40" fill="none" stroke="#6b7280" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                    <p>Drag and drop files here or click to browse</p>
+                </div>
+                <div id="uploadedFilesList" class="selected-files"></div>
+            </div>
+
+            <div class="form-group" style="margin-top: 2rem;">
+                <h3>Assign Files</h3>
+                <div id="assignmentContainer" class="assignment-container">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+                <button class="btn btn-secondary" onclick="closeAddFilesModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="handleAddFiles()">Add Selected Files</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal functions
+        function openAddFilesModal() {
+            const modal = document.getElementById('addFilesModal');
+            modal.classList.add('show');
+            populateExistingFiles();
+        }
+
+        function closeAddFilesModal() {
+            const modal = document.getElementById('addFilesModal');
+            modal.classList.remove('show');
+            resetModal();
+        }
+
+        function resetModal() {
+            // Reset file upload
+            document.getElementById('fileUpload').value = '';
+            document.getElementById('uploadedFilesList').innerHTML = '';
+           
+            // Reset search
+            const searchInput = document.querySelector('.search-bar input');
+            if (searchInput) searchInput.value = '';
+           
+            // Reset file selections
+            const selectedFiles = document.querySelectorAll('.file-card.selected');
+            selectedFiles.forEach(file => file.classList.remove('selected'));
+           
+            // Reset assignments
+            document.getElementById('assignmentContainer').innerHTML = '';
+           
+            // Reset to first tab
+            switchTab('existing');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                closeAddFilesModal();
+            }
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeAddFilesModal();
+            }
+        });
+
+        // Tab switching
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.tab-btn[onclick*="${tab}"]`).classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tab}FilesTab`).classList.add('active');
+        }
+
+        // File handling
+        const existingFiles = [
+            { id: 1, name: 'Company Guidelines.pdf', type: 'pdf', size: '2.4 MB', date: '2025-06-20' },
+            { id: 2, name: 'Employee Handbook.docx', type: 'docx', size: '1.8 MB', date: '2025-06-19' },
+            { id: 3, name: 'Training Materials.pdf', type: 'pdf', size: '5.2 MB', date: '2025-06-18' },
+            // Add more files as needed
+        ];
+
+        function populateExistingFiles() {
+            const grid = document.querySelector('.existing-files-grid');
+            grid.innerHTML = existingFiles.map(file => `
+                <div class="file-card" onclick="toggleFileSelection(this, ${file.id})">
+                    <div class="file-card-icon">${getFileIcon(file.type)}</div>
+                    <div class="file-card-name">${file.name}</div>
+                    <div class="file-card-info">${file.size} • ${new Date(file.date).toLocaleDateString()}</div>
+                </div>
+            `).join('');
+        }
+
+        function getFileIcon(type) {
+            switch(type) {
+                case 'pdf': return '📄';
+                case 'docx': return '📝';
+                case 'xlsx': return '📊';
+                default: return '📄';
+            }
+        }
+
+        function toggleFileSelection(element, fileId) {
+            element.classList.toggle('selected');
+            updateAssignments();
+        }
+
+        function searchFiles(query) {
+            const files = document.querySelectorAll('.file-card');
+            query = query.toLowerCase();
+           
+            files.forEach(file => {
+                const name = file.querySelector('.file-card-name').textContent.toLowerCase();
+                file.style.display = name.includes(query) ? 'block' : 'none';
+            });
+        }
+
+        // File upload handling
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileUpload');
+
+        dropZone.onclick = () => fileInput.click();
+
+        dropZone.ondragover = (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#2563eb';
+        };
+
+        dropZone.ondragleave = () => {
+            dropZone.style.borderColor = '#e5e7eb';
+        };
+
+        dropZone.ondrop = (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#e5e7eb';
+            handleFiles(e.dataTransfer.files);
+        };
+
+        fileInput.onchange = (e) => handleFiles(e.target.files);
+
+        function handleFiles(files) {
+            const uploadedList = document.getElementById('uploadedFilesList');
+            uploadedList.innerHTML = '';
+           
+            Array.from(files).forEach(file => {
+                const item = document.createElement('div');
+                item.className = 'file-card';
+                item.innerHTML = `
+                    <div class="file-card-icon">${getFileIcon(file.name.split('.').pop())}</div>
+                    <div class="file-card-name">${file.name}</div>
+                    <div class="file-card-info">${formatFileSize(file.size)}</div>
+                `;
+                uploadedList.appendChild(item);
+            });
+           
+            updateAssignments();
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function updateAssignments() {
+            const container = document.getElementById('assignmentContainer');
+            container.innerHTML = '';
+           
+            // Get selected existing files
+            const selectedExisting = Array.from(document.querySelectorAll('.existing-files-grid .file-card.selected'))
+                .map(card => card.querySelector('.file-card-name').textContent);
+           
+            // Get uploaded files
+            const uploadedFiles = Array.from(document.querySelectorAll('#uploadedFilesList .file-card'))
+                .map(card => card.querySelector('.file-card-name').textContent);
+           
+            // Combine all files
+            const allFiles = [...selectedExisting, ...uploadedFiles];
+           
+            // Create assignment rows
+            allFiles.forEach(fileName => {
+                const row = document.createElement('div');
+                row.className = 'assignment-row';
+                row.innerHTML = `
+                    <div class="file-name">${fileName}</div>
+                    <select multiple>
+                        <option value="john">John Doe</option>
+                        <option value="jane">Jane Smith</option>
+                        <option value="mike">Mike Johnson</option>
+                        <option value="sarah">Sarah Williams</option>
+                    </select>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function handleAddFiles() {
+            const assignments = Array.from(document.querySelectorAll('.assignment-row')).map(row => ({
+                fileName: row.querySelector('.file-name').textContent,
+                assignedTo: Array.from(row.querySelector('select').selectedOptions).map(opt => opt.value)
+            }));
+           
+            console.log('Assignments:', assignments);
+            closeAddFilesModal();
+            alert('Files assigned successfully!');
+        }   
+    </script>   
+</body>
+</html>
+
