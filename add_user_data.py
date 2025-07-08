@@ -5,7 +5,7 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'user_dashboard_project.settings')
 django.setup()
 
-from dashboard.models import UserProfile, File
+from dashboard.models import UserProfile, File, DashboardFileUser, File
 
 # Add files to dashboard_file table
 file1 = File(
@@ -42,6 +42,16 @@ user_profile = UserProfile(
 
 # Save the user profile to the database
 user_profile.save()
+
+# Add entry to dashboard_file_user table
+file_user = DashboardFileUser(
+    file_id="F001",
+    user_profile=user_profile,
+    status="viewed"
+)
+file_user.save()
+
+print("DashboardFileUser entry created successfully!")
 
 print("User profile created successfully!")
 

@@ -239,17 +239,12 @@
             margin-right: 1rem;
         }
 
-        .status-not-started {
+        .status-not-viewed {
             background: #fee2e2;
             color: #dc2626;
         }
 
-        .status-in-progress {
-            background: #fef3c7;
-            color: #d97706;
-        }
-
-        .status-complete {
+        .status-viewed {
             background: #dcfce7;
             color: #16a34a;
         }
@@ -677,19 +672,28 @@
                     </div>
                    
                     <div class="file-list">
-                        <!-- Existing file items -->
+                        {% for file in files %}
                         <div class="file-item">
                             <div class="file-name">
                                 <div class="file-icon">📄</div>
-                                <span>project_requirements.pdf</span>
+                                <span>{{ file.name }}</span>
                             </div>
                             <div class="file-actions">
-                                <span class="status status-complete">Complete</span>
+                                <span class="status {% if file.status == 'viewed' %}status-viewed{% else %}status-not-viewed{% endif %}">
+                                    {{ file.get_status_display }}
+                                </span>
+                                <form method="post" style="display: inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="file_id" value="{{ file.id }}">
+                                    <select name="status_{{ file.id }}" onchange="this.form.submit()">
+                                        <option value="not-viewed" {% if file.status == 'not-viewed' %}selected{% endif %}>Not Viewed</option>
+                                        <option value="viewed" {% if file.status == 'viewed' %}selected{% endif %}>Viewed</option>
+                                    </select>
+                                </form>
                                 <button class="btn btn-view">View File</button>
                             </div>
                         </div>
-                       
-                        <!-- Add more file items as needed -->
+                        {% endfor %}
                     </div>
                 </div>
             </div>

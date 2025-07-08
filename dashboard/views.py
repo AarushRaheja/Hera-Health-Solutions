@@ -29,27 +29,6 @@ def user_dashboard(request):
         }
     )
     
-    # Get files assigned to this user through DashboardFileUser
-    user_files = DashboardFileUser.objects.filter(
-        user_profile=user_profile
-    ).select_related('file').values(
-        'file__id',
-        'file__name',
-        'file__upload_date',
-        'status'
-    )
-    
-    # Convert to a more friendly format
-    files = [
-        {
-            'id': f['file__id'],
-            'name': f['file__name'],
-            'upload_date': f['file__upload_date'],
-            'status': f['status']
-        }
-        for f in user_files
-    ]
-    
     all_profiles = UserProfile.objects.all()
 
     if request.method == 'POST':
@@ -79,7 +58,7 @@ def user_dashboard(request):
         return redirect('user_dashboard')
 
     return render(request, 'dashboard/user_dashboard.html', {
-        'files': user_files,
+        'files': None,
         'all_profiles': all_profiles
     })
 
@@ -122,7 +101,27 @@ def assign_files(request):
 @login_required
 def user_page(request, profile_id):
     profile = get_object_or_404(UserProfile, id=profile_id)
-    user_files = DashboardFileUser.objects.filter(user_profile=profile_id)
+    
+    # Get files assigned to this profile through DashboardFileUser
+    file_user_entries = DashboardFileUser.objects.filter(
+        user_profile_id=profile_id
+    ).select_related('file').values(
+        'file__id',
+        'file__name',
+        'file__upload_date',
+        'status'
+    )
+    
+    # Convert to a more friendly format
+    files = [
+        {
+            'id': f['file__id'],
+            'name': f['file__name'],
+            'upload_date': f['file__upload_date'],
+            'status': f['status']
+        }
+        for f in file_user_entries
+    ]
     
     # Handle user profile form
     if request.method == 'POST' and 'edit_profile' in request.POST:
@@ -136,15 +135,22 @@ def user_page(request, profile_id):
     # Handle file status updates
     if request.method == 'POST':
         for file_id in request.POST.getlist('file_id'):
-            file = File.objects.get(id=file_id)
-            new_status = request.POST.get(f'status_{file_id}')
-            if new_status in dict(File.STATUS_CHOICES):
-                file.status = new_status
-                file.save()
+            try:
+                # Get the DashboardFileUser entry for this file/profile
+                file_user = DashboardFileUser.objects.get(
+                    file_id=file_id,
+                    user_profile_id=profile_id
+                )
+                new_status = request.POST.get(f'status_{file_id}')
+                if new_status in ['not-viewed', 'viewed']:
+                    file_user.status = new_status
+                    file_user.save()
+            except DashboardFileUser.DoesNotExist:
+                continue
         return redirect('user_page', profile_id=profile_id)
 
     return render(request, 'dashboard/user_dashboard.html', {
-        'files': user_files,
+        'files': files,
         'profile': profile,
         'all_profiles': UserProfile.objects.all(),
         'profile_form': form
