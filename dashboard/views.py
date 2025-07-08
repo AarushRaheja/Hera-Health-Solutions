@@ -5,6 +5,7 @@ from .models import File, UserProfile, DashboardFileUser
 from django import forms
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+import json
 
 # Custom form for editing user profile
 class UserProfileForm(forms.ModelForm):
@@ -30,6 +31,7 @@ def user_dashboard(request):
     )
     
     all_profiles = UserProfile.objects.all()
+    all_files = File.objects.all().values('id', 'name', 'upload_date')
 
     if request.method == 'POST':
         # Handle file status updates
@@ -48,18 +50,10 @@ def user_dashboard(request):
                 continue
         return redirect('user_dashboard')
 
-    if request.method == 'POST':
-        for file_id in request.POST.getlist('file_id'):
-            file = File.objects.get(id=file_id)
-            new_status = request.POST.get(f'status_{file_id}')
-            if new_status in dict(File.STATUS_CHOICES):
-                file.status = new_status
-                file.save()
-        return redirect('user_dashboard')
-
     return render(request, 'dashboard/user_dashboard.html', {
         'files': None,
-        'all_profiles': all_profiles
+        'all_profiles': all_profiles,
+        'all_files': json.dumps(list(all_files))
     })
 
 @csrf_exempt
@@ -101,7 +95,7 @@ def assign_files(request):
 @login_required
 def user_page(request, profile_id):
     profile = get_object_or_404(UserProfile, id=profile_id)
-    
+    all_files = File.objects.all().values('id', 'name', 'upload_date')
     # Get files assigned to this profile through DashboardFileUser
     file_user_entries = DashboardFileUser.objects.filter(
         user_profile_id=profile_id
@@ -153,5 +147,7 @@ def user_page(request, profile_id):
         'files': files,
         'profile': profile,
         'all_profiles': UserProfile.objects.all(),
-        'profile_form': form
+        'profile_form': form,
+        'all_files': all_files
     })
+   
