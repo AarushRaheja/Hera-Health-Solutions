@@ -1,7 +1,7 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import File, UserProfile
+from .models import File, UserProfile, DashboardFileUser
 from django import forms
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -19,8 +19,55 @@ class UserProfileForm(forms.ModelForm):
 
 @login_required
 def user_dashboard(request):
-    user_files = File.objects.filter(user=request.user)
+    # Get or create user profile
+    user_profile, created = UserProfile.objects.get_or_create(
+        id=request.user.id,
+        defaults={
+            'first_name': request.user.first_name,
+            'last_name': request.user.last_name,
+            'email': request.user.email
+        }
+    )
+    
+    # Get files assigned to this user through DashboardFileUser
+    user_files = DashboardFileUser.objects.filter(
+        user_profile=user_profile
+    ).select_related('file').values(
+        'file__id',
+        'file__name',
+        'file__upload_date',
+        'status'
+    )
+    
+    # Convert to a more friendly format
+    files = [
+        {
+            'id': f['file__id'],
+            'name': f['file__name'],
+            'upload_date': f['file__upload_date'],
+            'status': f['status']
+        }
+        for f in user_files
+    ]
+    
     all_profiles = UserProfile.objects.all()
+
+    if request.method == 'POST':
+        # Handle file status updates
+        for file_id in request.POST.getlist('file_id'):
+            try:
+                # Get the DashboardFileUser entry for this file/user
+                file_user = DashboardFileUser.objects.get(
+                    file_id=file_id,
+                    user_profile=user_profile
+                )
+                new_status = request.POST.get(f'status_{file_id}')
+                if new_status in ['not-viewed', 'viewed']:
+                    file_user.status = new_status
+                    file_user.save()
+            except DashboardFileUser.DoesNotExist:
+                continue
+        return redirect('user_dashboard')
 
     if request.method == 'POST':
         for file_id in request.POST.getlist('file_id'):
@@ -75,7 +122,7 @@ def assign_files(request):
 @login_required
 def user_page(request, profile_id):
     profile = get_object_or_404(UserProfile, id=profile_id)
-    user_files = File.objects.filter(profiles=profile)
+    user_files = DashboardFileUser.objects.filter(user_profile=profile_id)
     
     # Handle user profile form
     if request.method == 'POST' and 'edit_profile' in request.POST:
