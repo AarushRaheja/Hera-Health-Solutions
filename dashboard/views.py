@@ -145,13 +145,13 @@ def user_page(request, profile_id):
                     file_user.save()
             except DashboardFileUser.DoesNotExist:
                 continue
-        return redirect('user_page', profile_id=profile_id)
+        return redirect('dashboard:user_page', profile_id=profile_id)
 
     return render(request, 'dashboard/user_dashboard.html', {
         'files': files,
         'profile': profile,
         'all_profiles': UserProfile.objects.all(),
         'profile_form': form,
-        'all_files': all_files
+        'all_files': json.dumps(list(all_files))
     })
    
