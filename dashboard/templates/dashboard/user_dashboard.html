@@ -830,7 +830,7 @@
         function populateExistingFiles() {
             const grid = document.querySelector('.existing-files-grid');
             grid.innerHTML = existingFiles.map(file => `
-                <div class="file-card" onclick="toggleFileSelection(this, ${file.id})">
+                <div class="file-card" onclick="toggleFileSelection(this)">
                     <div class="file-card-icon">${getFileIcon(file.name.split('.').pop())}</div>
                     <div class="file-card-name">${file.name}</div>
                     <div class="file-card-info">${new Date(file.date).toLocaleDateString()}</div>
@@ -847,7 +847,7 @@
             }
         }
 
-        function toggleFileSelection(element, fileId) {
+        function toggleFileSelection(element) {
             element.classList.toggle('selected');
             updateAssignments();
         }
@@ -955,7 +955,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    
                 },
                 body: JSON.stringify({ assignments: assignments })
             })

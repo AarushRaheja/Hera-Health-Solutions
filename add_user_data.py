@@ -5,7 +5,12 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'user_dashboard_project.settings')
 django.setup()
 
-from dashboard.models import UserProfile, File, DashboardFileUser, File
+from dashboard.models import UserProfile, File, DashboardFileUser
+
+# Clear existing data
+File.objects.all().delete()
+UserProfile.objects.all().delete()
+DashboardFileUser.objects.all().delete()
 
 # Add files to dashboard_file table
 file1 = File(
@@ -29,6 +34,12 @@ file3 = File(
 )
 file3.save()
 
+file4 = File(
+    id="F004",
+    name="Policy.docx",
+    upload_date="5/22/2025"
+)
+file4.save()
 print("Files added to dashboard_file table successfully!")
 
 # Create a new user profile with the specified data

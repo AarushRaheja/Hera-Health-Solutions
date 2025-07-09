@@ -75,11 +75,15 @@ def assign_files(request):
                 )
                 
                 # Update assigned profiles
-                file.profiles.clear()
                 for profile_id in assigned_to:
                     try:
                         profile = UserProfile.objects.get(id=profile_id)
-                        file.profiles.add(profile)
+                        # Use get_or_create to prevent duplicates
+                        DashboardFileUser.objects.get_or_create(
+                            file_id=file.id,
+                            user_profile_id=profile.id,
+                            defaults={'status': 'not-viewed'}
+                        )
                     except UserProfile.DoesNotExist:
                         continue
                 
