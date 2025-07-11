@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import File, UserProfile, DashboardFileUser
 from django import forms
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 import os
@@ -95,6 +95,20 @@ def upload_files(request):
         return JsonResponse({'success': True, 'files': results})
     
     return JsonResponse({'success': False, 'error': 'No files uploaded'}, status=400)
+
+@login_required
+def serve_file(request, filename):
+    file_path = os.path.join(settings.MEDIA_ROOT, 'files', filename)
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as f:
+            response = HttpResponse(f.read())
+            # Set appropriate content type based on file extension
+            import mimetypes
+            content_type, _ = mimetypes.guess_type(file_path)
+            if content_type:
+                response['Content-Type'] = content_type
+            return response
+    return HttpResponse('File not found', status=404)
 
 @csrf_exempt
 @login_required

@@ -690,7 +690,7 @@
                                         <option value="viewed" {% if file.status == 'viewed' %}selected{% endif %}>Viewed</option>
                                     </select>
                                 </form>
-                                <button class="btn btn-view">View File</button>
+                                <button class="btn btn-view" onclick="viewFile('{{ file.name }}')">View File</button>
                             </div>
                         </div>
                         {% endfor %}
@@ -976,6 +976,10 @@
                 `;
                 container.appendChild(row);
             });
+        }
+
+        function viewFile(filename) {
+            window.open(`/dashboard/files/${filename}`, '_blank');
         }
 
         function handleAddFiles() {
