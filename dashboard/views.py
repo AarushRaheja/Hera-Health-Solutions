@@ -6,6 +6,9 @@ from django import forms
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+import os
+from django.conf import settings
+from datetime import datetime
 
 # Custom form for editing user profile
 class UserProfileForm(forms.ModelForm):
@@ -55,6 +58,43 @@ def user_dashboard(request):
         'all_profiles': all_profiles,
         'all_files': json.dumps(list(all_files))
     })
+
+@csrf_exempt
+@login_required
+def upload_files(request):
+    if request.method == 'POST' and request.FILES.get('files'):
+        uploaded_files = request.FILES.getlist('files')
+        results = []
+        
+        for uploaded_file in uploaded_files:
+            file_id = f"file_{File.objects.count() + 1}"
+            file_path = os.path.join(settings.MEDIA_ROOT, 'files', uploaded_file.name)
+            
+            # Save file to disk
+            with open(file_path, 'wb') as destination:
+                for chunk in uploaded_file.chunks():
+                    destination.write(chunk)
+            
+            # Create File model entry
+            file_obj = File(id=file_id, name=uploaded_file.name, upload_date=str(datetime.now()))
+            file_obj.save()
+            
+            # Create DashboardFileUser entry for the uploader
+            DashboardFileUser.objects.create(
+                file=file_obj,
+                user_profile_id=request.user.id,
+                status='not-viewed'
+            )
+            
+            results.append({
+                'id': file_id,
+                'name': uploaded_file.name,
+                'upload_date': str(datetime.now())
+            })
+        
+        return JsonResponse({'success': True, 'files': results})
+    
+    return JsonResponse({'success': False, 'error': 'No files uploaded'}, status=400)
 
 @csrf_exempt
 @login_required
