@@ -962,12 +962,12 @@
             // Combine all files
             const allFiles = [...selectedExisting, ...uploadedFiles];
            
-            // Create assignment rows
-            allFiles.forEach(fileName => {
+            // Only show one row for user selection if there are selected files
+            if (allFiles.length > 0) {
                 const row = document.createElement('div');
                 row.className = 'assignment-row';
                 row.innerHTML = `
-                    <div class="file-name">${fileName}</div>
+                    <div class="file-name">${allFiles.length} files selected</div>
                     <select multiple>
                         {% for profile in all_profiles %}
                         <option value="{{ profile.id }}">{{ profile.first_name }} {{ profile.last_name }}</option>
@@ -975,7 +975,7 @@
                     </select>
                 `;
                 container.appendChild(row);
-            });
+            }
         }
 
         function viewFile(filename) {
@@ -983,11 +983,23 @@
         }
 
         function handleAddFiles() {
-            const assignments = Array.from(document.querySelectorAll('.assignment-row')).map(row => ({
-                fileName: row.querySelector('.file-name').textContent,
-                assignedTo: Array.from(row.querySelector('select').selectedOptions).map(opt => opt.value)
+            // Get all selected files
+            const selectedExisting = Array.from(document.querySelectorAll('.existing-files-grid .file-card.selected'))
+                .map(card => card.querySelector('.file-card-name').textContent);
+            const uploadedFiles = Array.from(document.querySelectorAll('#uploadedFilesList .file-card'))
+                .map(card => card.querySelector('.file-card-name').textContent);
+            const allFiles = [...selectedExisting, ...uploadedFiles];
+            
+            // Get selected users
+            const selectElement = document.querySelector('.assignment-row select');
+            const assignedTo = Array.from(selectElement.selectedOptions).map(opt => opt.value);
+            
+            // Create assignments array
+            const assignments = allFiles.map(fileName => ({
+                fileName,
+                assignedTo
             }));
-           
+            
             console.log('Assignments:', assignments);
             
             // Send assignments to server
@@ -995,9 +1007,8 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    
                 },
-                body: JSON.stringify({ assignments: assignments })
+                body: JSON.stringify({ assignments })
             })
             .then(response => response.json())
             .then(data => {
