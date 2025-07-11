@@ -743,14 +743,14 @@
                 </form>
             </div>
 
-            <div class="form-group" style="margin-top: 2rem;">
+            <div class="form-group" style="margin-top: 2rem;" id="assignmentsSection">
                 <h3>Assign Files</h3>
                 <div id="assignmentContainer" class="assignment-container">
                     <!-- Will be populated by JavaScript -->
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+            <div id="bottomButtons" style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
                 <button class="btn btn-secondary" onclick="closeAddFilesModal()">Cancel</button>
                 <button class="btn btn-primary" onclick="handleAddFiles()">Add Selected Files</button>
             </div>
@@ -816,6 +816,13 @@
                 content.classList.remove('active');
             });
             document.getElementById(`${tab}FilesTab`).classList.add('active');
+
+            // Hide assignments section and bottom buttons in upload tab
+            const assignmentsSection = document.getElementById('assignmentsSection');
+            assignmentsSection.style.display = tab === 'upload' ? 'none' : 'block';
+            
+            const bottomButtons = document.getElementById('bottomButtons');
+            bottomButtons.style.display = tab === 'upload' ? 'none' : 'block';
         }
 
         // File handling
