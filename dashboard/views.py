@@ -156,17 +156,23 @@ def assign_files(request):
 def delete_file(request, filename):
     if request.method == 'DELETE':
         try:
-            # Get the DashboardFile object
-            file_obj = File.objects.get(name=filename)
+            # Get the File object(s)
+            file_objs = File.objects.filter(name=filename)
             
-            # Delete file from media directory
-            file_path = os.path.join(settings.MEDIA_ROOT, 'files', filename)
-            if os.path.exists(file_path):
-                os.remove(file_path)
+            # If no files found, return error
+            if not file_objs.exists():
+                raise File.DoesNotExist(f"File '{filename}' not found")
                 
-            # Delete the DashboardFile object
-            file_obj.delete()
-            
+            # Process each file
+            for file_obj in file_objs:
+                # Delete file from media directory
+                file_path = os.path.join(settings.MEDIA_ROOT, 'files', file_obj.name)
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                    
+                # Delete the File object
+                file_obj.delete()
+                
             # Delete all file-user assignments for this file
             DashboardFileUser.objects.filter(file__name=filename).delete()
             
@@ -246,7 +252,7 @@ def user_page(request, profile_id):
         'profile': profile,
         'profile_form': form,
         'files': files,
-        'all_files': all_files,
+        'all_files': json.dumps(list(all_files)),
         'all_profiles': UserProfile.objects.all(),
         'profile_id': profile_id
     })

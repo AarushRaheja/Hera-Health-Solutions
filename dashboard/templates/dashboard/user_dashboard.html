@@ -629,8 +629,8 @@
                 
                 if (isCompleteDelete) {
                     if (!confirm('Are you sure you want to permanently delete this file? This will remove the file from all user profiles.')) {
-                    return;
-                }
+                        return;
+                    }
                     url = `/dashboard/delete/${filename}/`;
                 } else {
                     if (!confirm('Are you sure you want to remove this file assignment?')) {
@@ -640,16 +640,127 @@
                 }
                 
                 if (url) {
-                fetch(url, {
-                    method: 'DELETE',
+                    fetch(url, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message);
+                            location.reload();
+                        } else {
+                            alert(data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while processing your request.');
+                    });
+                }
+            }
+        // Modal functions
+        function openAddFilesModal(profileId) {
+            const modal = document.getElementById('addFilesModal');
+            modal.classList.add('show');
+            populateExistingFiles();
+        }
+
+        function closeAddFilesModal() {
+            const modal = document.getElementById('addFilesModal');
+            modal.classList.remove('show');
+            resetModal();
+        }
+
+        function resetModal() {
+            // Reset file upload
+            document.getElementById('fileUpload').value = '';
+            document.getElementById('uploadedFilesList').innerHTML = '';
+           
+            // Reset search
+            const searchInput = document.querySelector('.search-bar input');
+            if (searchInput) searchInput.value = '';
+           
+            // Reset file selections
+            const selectedFiles = document.querySelectorAll('.file-card.selected');
+            selectedFiles.forEach(file => file.classList.remove('selected'));
+           
+            // Reset assignments
+            document.getElementById('assignmentContainer').innerHTML = '';
+           
+            // Reset to first tab
+            switchTab('existing');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                closeAddFilesModal();
+            }
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeAddFilesModal();
+            }
+        });
+
+        // Tab switching
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.tab-btn[onclick*="${tab}"]`).classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tab}FilesTab`).classList.add('active');
+
+            // Hide assignments section and bottom buttons in upload tab
+            const assignmentsSection = document.getElementById('assignmentsSection');
+            assignmentsSection.style.display = tab === 'upload' ? 'none' : 'block';
+            
+            const bottomButtons = document.getElementById('bottomButtons');
+            bottomButtons.style.display = tab === 'upload' ? 'none' : 'block';
+        }
+
+        // Handle file assignments
+        function handleAddFiles(profileId) {
+            // Get all selected files
+            const selectedExisting = Array.from(document.querySelectorAll('.existing-files-grid .file-card.selected'))
+                .map(card => card.querySelector('.file-card-name').textContent);
+            const uploadedFiles = Array.from(document.querySelectorAll('#uploadedFilesList .file-card'))
+                .map(card => card.querySelector('.file-card-name').textContent);
+
+            const allFiles = [...selectedExisting, ...uploadedFiles];
+
+            if (allFiles.length === 0) {
+                alert('Please select at least one file');
+                return;
+            }
+
+            // Create assignments for each file
+            allFiles.forEach(filename => {
+                fetch(`/dashboard/assign-files/`, {
+                    method: 'POST',
                     headers: {
+                        'Content-Type': 'application/json',
                         'X-CSRFToken': '{{ csrf_token }}'
-                    }
+                    },
+                    body: JSON.stringify({
+                        filename: filename,
+                        profile_id: profileId,
+                        status: 'not-viewed'
+                    })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert(data.message);
+                        alert('Files assigned successfully');
                         location.reload();
                     } else {
                         alert(data.error);
@@ -657,10 +768,11 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('An error occurred while processing your request.');
+                    alert('An error occurred while assigning files.');
                 });
-                }
-            }
+            });
+        }
+
         </script>
         <div class="container">
             <h1>File Management Dashboard</h1>
