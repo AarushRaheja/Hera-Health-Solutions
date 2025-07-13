@@ -151,6 +151,25 @@ def assign_files(request):
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
 
 @login_required
+def delete_file(request, filename, profile_id):
+    if request.method == 'DELETE':
+        try:
+            file_obj = File.objects.get(name=filename)
+            
+            # Check if user has permission to unassign this file
+            if not DashboardFileUser.objects.filter(file_id=file_obj.id, user_profile_id=profile_id).exists():
+                return JsonResponse({'success': False, 'error': 'Permission denied'}, status=403)
+            
+            # Delete the DashboardFileUser entry for this user and file
+            DashboardFileUser.objects.filter(file_id=file_obj.id, user_profile_id=profile_id).delete()
+            
+            return JsonResponse({'success': True})
+        except File.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'File not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+@login_required
 def user_page(request, profile_id):
     profile = get_object_or_404(UserProfile, id=profile_id)
     all_files = File.objects.all().values('id', 'name', 'upload_date')
@@ -202,10 +221,10 @@ def user_page(request, profile_id):
         return redirect('dashboard:user_page', profile_id=profile_id)
 
     return render(request, 'dashboard/user_dashboard.html', {
-        'files': files,
         'profile': profile,
-        'all_profiles': UserProfile.objects.all(),
         'profile_form': form,
-        'all_files': json.dumps(list(all_files))
+        'files': files,
+        'all_files': all_files,
+        'all_profiles': UserProfile.objects.all(),
+        'profile_id': profile_id
     })
-   

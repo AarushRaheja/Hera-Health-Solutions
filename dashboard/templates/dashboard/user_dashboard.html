@@ -618,6 +618,34 @@
         </style>
     </head>
     <body>
+        <script>
+            // Global deleteFile function
+            function deleteFile(filename, profileId) {
+                if (confirm('Are you sure you want to delete this file assignment?')) {
+                    const button = event.target;
+                    const url = button.getAttribute('data-delete-url');
+                    fetch(url, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                        // Refresh the page to show updated file list
+                        location.reload();
+                        } else {
+                            alert(data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while deleting the file.');
+                    });
+                }
+            }
+        </script>
         <div class="container">
             <h1>File Management Dashboard</h1>
            
@@ -691,6 +719,7 @@
                                     </select>
                                 </form>
                                 <button class="btn btn-view" onclick="viewFile('{{ file.name }}')">View File</button>
+                                <button class="btn btn-secondary" data-delete-url="{% url 'dashboard:delete_file' profile_id=profile_id filename=file.name %}" onclick="deleteFile('{{ file.name }}', '{{ profile_id }}')">Delete</button>
                             </div>
                         </div>
                         {% endfor %}
@@ -957,8 +986,7 @@
            
             // Get uploaded files
             const uploadedFiles = Array.from(document.querySelectorAll('#uploadedFilesList .file-card'))
-                .map(card => card.querySelector('.file-card-name').textContent);
-           
+                .map(card => card.querySelector('.file-card-name').textContent);           
             // Combine all files
             const allFiles = [...selectedExisting, ...uploadedFiles];
            
