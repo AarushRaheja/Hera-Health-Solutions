@@ -619,14 +619,18 @@
     </head>
     <body>
         <script>
-            // Global deleteFile function
+            // Global functions
+            function viewFile(filename) {
+                window.location.href = `/dashboard/files/${filename}/`;
+            }
+
             function deleteFile(filename, profileId, isCompleteDelete = false) {
                 let url;
                 
                 if (isCompleteDelete) {
                     if (!confirm('Are you sure you want to permanently delete this file? This will remove the file from all user profiles.')) {
-                        return;
-                    }
+                    return;
+                }
                     url = `/dashboard/delete/${filename}/`;
                 } else {
                     if (!confirm('Are you sure you want to remove this file assignment?')) {
@@ -636,31 +640,31 @@
                 }
                 
                 if (url) {
-                    fetch(url, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRFToken': '{{ csrf_token }}'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(data.message);
-                            location.reload();
-                        } else {
-                            alert(data.error);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while processing your request.');
-                    });
+                fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert(data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while processing your request.');
+                });
                 }
             }
         </script>
         <div class="container">
             <h1>File Management Dashboard</h1>
-           
+            
             <div class="grid">
                 <!-- User Selection Panel -->
                 <div class="user-panel">
