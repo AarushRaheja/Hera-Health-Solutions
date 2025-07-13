@@ -1,4 +1,3 @@
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import File, UserProfile, DashboardFileUser
@@ -9,6 +8,8 @@ import json
 import os
 from django.conf import settings
 from datetime import datetime
+from django.template.loader import render_to_string
+from django.core.files.storage import default_storage
 
 # Custom form for editing user profile
 class UserProfileForm(forms.ModelForm):
@@ -151,16 +152,42 @@ def assign_files(request):
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
 
 @login_required
-def delete_file(request, filename, profile_id):
+@csrf_exempt
+def delete_file(request, filename):
     if request.method == 'DELETE':
         try:
-            # Delete all file-user assignments for this filename and profile_id
+            # Get the DashboardFile object
+            file_obj = File.objects.get(name=filename)
+            
+            # Delete file from media directory
+            file_path = os.path.join(settings.MEDIA_ROOT, 'files', filename)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                
+            # Delete the DashboardFile object
+            file_obj.delete()
+            
+            # Delete all file-user assignments for this file
+            DashboardFileUser.objects.filter(file__name=filename).delete()
+            
+            return JsonResponse({'success': True, 'message': 'File deleted successfully'})
+        except File.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'File not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+@login_required
+@csrf_exempt
+def delete_assigned_file(request, filename, profile_id):
+    if request.method == 'DELETE':
+        try:
+            # Delete only the file-user assignment for this specific profile
             DashboardFileUser.objects.filter(
                 file__name=filename,
                 user_profile_id=profile_id
             ).delete()
             
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True, 'message': 'File assignment removed'})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
 

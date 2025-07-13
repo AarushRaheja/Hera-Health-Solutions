@@ -620,10 +620,22 @@
     <body>
         <script>
             // Global deleteFile function
-            function deleteFile(filename, profileId) {
-                if (confirm('Are you sure you want to delete this file assignment?')) {
-                    const button = event.target;
-                    const url = button.getAttribute('data-delete-url');
+            function deleteFile(filename, profileId, isCompleteDelete = false) {
+                let url;
+                
+                if (isCompleteDelete) {
+                    if (!confirm('Are you sure you want to permanently delete this file? This will remove the file from all user profiles.')) {
+                        return;
+                    }
+                    url = `/dashboard/delete/${filename}/`;
+                } else {
+                    if (!confirm('Are you sure you want to remove this file assignment?')) {
+                        return;
+                    }
+                    url = `/dashboard/delete-assigned/${profileId}/${filename}/`;
+                }
+                
+                if (url) {
                     fetch(url, {
                         method: 'DELETE',
                         headers: {
@@ -633,15 +645,15 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                        // Refresh the page to show updated file list
-                        location.reload();
+                            alert(data.message);
+                            location.reload();
                         } else {
                             alert(data.error);
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('An error occurred while deleting the file.');
+                        alert('An error occurred while processing your request.');
                     });
                 }
             }
@@ -719,7 +731,7 @@
                                     </select>
                                 </form>
                                 <button class="btn btn-view" onclick="viewFile('{{ file.name }}')">View File</button>
-                                <button class="btn btn-secondary" data-delete-url="{% url 'dashboard:delete_file' profile_id=profile_id filename=file.name %}" onclick="deleteFile('{{ file.name }}', '{{ profile_id }}')">Delete</button>
+                                <button class="btn btn-secondary" onclick="deleteFile('{{ file.name }}', '{{ profile_id }}', false)">Delete File</button>
                             </div>
                         </div>
                         {% endfor %}
@@ -877,6 +889,14 @@
                     <div class="file-card-icon">${getFileIcon(file.name.split('.').pop())}</div>
                     <div class="file-card-name">${file.name}</div>
                     <div class="file-card-info">${new Date(file.date).toLocaleDateString()}</div>
+                    <div class="file-card-actions">
+                        <button class="btn btn-danger" onclick="deleteFile('${file.name}', '{{ profile.id }}', true)">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            Delete File
+                        </button>
+                    </div>
                 </div>
             `).join('');
         }
