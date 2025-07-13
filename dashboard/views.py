@@ -154,18 +154,13 @@ def assign_files(request):
 def delete_file(request, filename, profile_id):
     if request.method == 'DELETE':
         try:
-            file_obj = File.objects.get(name=filename)
-            
-            # Check if user has permission to unassign this file
-            if not DashboardFileUser.objects.filter(file_id=file_obj.id, user_profile_id=profile_id).exists():
-                return JsonResponse({'success': False, 'error': 'Permission denied'}, status=403)
-            
-            # Delete the DashboardFileUser entry for this user and file
-            DashboardFileUser.objects.filter(file_id=file_obj.id, user_profile_id=profile_id).delete()
+            # Delete all file-user assignments for this filename and profile_id
+            DashboardFileUser.objects.filter(
+                file__name=filename,
+                user_profile_id=profile_id
+            ).delete()
             
             return JsonResponse({'success': True})
-        except File.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'File not found'}, status=404)
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
