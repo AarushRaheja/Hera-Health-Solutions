@@ -1,15 +1,17 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from .models import File, DashboardFileUser
 from django import forms
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 import json
 import os
 from datetime import datetime
 from django.template.loader import render_to_string
 from django.core.files.storage import default_storage
+from .models import File, DashboardFileUser
+
 
 # Custom form for editing user profile
 class UserProfileForm(forms.ModelForm):
@@ -23,7 +25,12 @@ class UserProfileForm(forms.ModelForm):
 @login_required
 def user_dashboard(request):
     all_files = File.objects.all().values('id', 'name', 'upload_date')
-
+    
+    if request.user.is_superuser:
+        all_users = User.objects.all()  # Show all users for superusers
+    else:
+        all_users = User.objects.filter(id=request.user.id)  # Only show current user
+    
     if request.method == 'POST':
         # Handle file status updates
         for file_id in request.POST.getlist('file_id'):
@@ -39,10 +46,12 @@ def user_dashboard(request):
             except DashboardFileUser.DoesNotExist:
                 continue
         return redirect('user_dashboard')
-
     return render(request, 'dashboard/user_dashboard.html', {
+        
         'files': None,
-        'all_files': json.dumps(list(all_files))
+        'all_files': json.dumps(list(all_files)),
+        'all_profiles': all_users,
+        #'first_load': True
     })
 
 @csrf_exempt
@@ -165,13 +174,13 @@ def delete_file(request, filename):
 
 @login_required
 @csrf_exempt
-def delete_assigned_file(request, filename, profile_id):
+def delete_assigned_file(request, filename, user_id):
     if request.method == 'DELETE':
         try:
             # Delete only the file-user assignment for this specific profile
             DashboardFileUser.objects.filter(
                 file__name=filename,
-                user_profile_id=profile_id
+                user_id=user_id
             ).delete()
             
             return JsonResponse({'success': True, 'message': 'File assignment removed'})
@@ -179,12 +188,12 @@ def delete_assigned_file(request, filename, profile_id):
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 @login_required
-def user_page(request, profile_id):
-    profile = get_object_or_404(UserProfile, id=profile_id)
+def user_page(request, user_id):
+    profile = get_object_or_404(User, id=user_id)
     all_files = File.objects.all().values('id', 'name', 'upload_date')
     # Get files assigned to this profile through DashboardFileUser
     file_user_entries = DashboardFileUser.objects.filter(
-        user_profile_id=profile_id
+        user_id=user_id
     ).select_related('file').values(
         'file__id',
         'file__name',
@@ -208,7 +217,7 @@ def user_page(request, profile_id):
         form = UserProfileForm(request.POST, instance=profile)
         if form.is_valid():
             form.save()
-            return redirect('dashboard:user_page', profile_id=profile_id)
+            return redirect('dashboard:user_page', user_id=user_id)
     else:
         form = UserProfileForm(instance=profile)
     
@@ -219,7 +228,7 @@ def user_page(request, profile_id):
                 # Get the DashboardFileUser entry for this file/profile
                 file_user = DashboardFileUser.objects.get(
                     file_id=file_id,
-                    user_profile_id=profile_id
+                    user_id=user_id
                 )
                 new_status = request.POST.get(f'status_{file_id}')
                 if new_status in ['not-viewed', 'viewed']:
@@ -227,13 +236,19 @@ def user_page(request, profile_id):
                     file_user.save()
             except DashboardFileUser.DoesNotExist:
                 continue
-        return redirect('dashboard:user_page', profile_id=profile_id)
+        return redirect('dashboard:user_page', user_id=user_id)
 
+    # Get users based on superuser status
+    if request.user.is_superuser:
+        all_users = User.objects.all()  # Show all users for superusers
+    else:
+        all_users = User.objects.filter(id=user_id)  # Only show current user
+    
     return render(request, 'dashboard/user_dashboard.html', {
         'profile': profile,
         'profile_form': form,
         'files': files,
         'all_files': json.dumps(list(all_files)),
-        'all_profiles': UserProfile.objects.all(),
-        'profile_id': profile_id
+        'all_profiles': all_users,
+        'profile_id': user_id
     })
