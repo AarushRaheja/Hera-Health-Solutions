@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import File, UserProfile, DashboardFileUser
+from django.contrib.auth.models import User
+from .models import File, DashboardFileUser
 from django import forms
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 import os
-from django.conf import settings
 from datetime import datetime
 from django.template.loader import render_to_string
 from django.core.files.storage import default_storage
@@ -14,37 +14,23 @@ from django.core.files.storage import default_storage
 # Custom form for editing user profile
 class UserProfileForm(forms.ModelForm):
     class Meta:
-        model = UserProfile
-        fields = ['first_name', 'last_name', 'email', 'phone_number']
+        model = DashboardFileUser
+        fields = ['status']
         widgets = {
-            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control'})
+            'status': forms.Select(attrs={'class': 'form-control'})
         }
 
 @login_required
 def user_dashboard(request):
-    # Get or create user profile
-    user_profile, created = UserProfile.objects.get_or_create(
-        id=request.user.id,
-        defaults={
-            'first_name': request.user.first_name,
-            'last_name': request.user.last_name,
-            'email': request.user.email
-        }
-    )
-    
-    all_profiles = UserProfile.objects.all()
     all_files = File.objects.all().values('id', 'name', 'upload_date')
 
     if request.method == 'POST':
         # Handle file status updates
         for file_id in request.POST.getlist('file_id'):
             try:
-                # Get the DashboardFileUser entry for this file/user
                 file_user = DashboardFileUser.objects.get(
                     file_id=file_id,
-                    user_profile=user_profile
+                    user=request.user
                 )
                 new_status = request.POST.get(f'status_{file_id}')
                 if new_status in ['not-viewed', 'viewed']:
@@ -56,7 +42,6 @@ def user_dashboard(request):
 
     return render(request, 'dashboard/user_dashboard.html', {
         'files': None,
-        'all_profiles': all_profiles,
         'all_files': json.dumps(list(all_files))
     })
 
@@ -83,7 +68,7 @@ def upload_files(request):
             # Create DashboardFileUser entry for the uploader
             DashboardFileUser.objects.create(
                 file=file_obj,
-                user_profile_id=request.user.id,
+                user=request.user,
                 status='not-viewed'
             )
             
@@ -130,17 +115,13 @@ def assign_files(request):
                 )
                 
                 # Update assigned profiles
-                for profile_id in assigned_to:
-                    try:
-                        profile = UserProfile.objects.get(id=profile_id)
-                        # Use get_or_create to prevent duplicates
-                        DashboardFileUser.objects.get_or_create(
-                            file_id=file.id,
-                            user_profile_id=profile.id,
-                            defaults={'status': 'not-viewed'}
-                        )
-                    except UserProfile.DoesNotExist:
-                        continue
+                for user_id in assigned_to:
+                    # Use get_or_create to prevent duplicates
+                    DashboardFileUser.objects.get_or_create(
+                        file_id=file.id,
+                        user_id=user_id,
+                        defaults={'status': 'not-viewed'}
+                    )
                 
                 file.save()
             

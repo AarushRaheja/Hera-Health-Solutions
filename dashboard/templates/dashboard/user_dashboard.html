@@ -802,12 +802,13 @@
                         {% endfor %}
                     </div>
                 <!-- Profile Edit Section -->
-                {% if profile %}
+                {% if request.user.is_authenticated %}
                 <div class="profile-edit-section">
                     <h3>Edit Profile</h3>
                     <form method="post" class="profile-form">
                         {% csrf_token %}
-                        {{ profile_form.as_p }}
+                        <p><strong>Username:</strong> {{ request.user.username }}</p>
+                        <p><strong>Email:</strong> {{ request.user.email }}</p>
                         <button type="submit" name="edit_profile" class="btn btn-primary">Save Changes</button>
                     </form>
                 </div>
