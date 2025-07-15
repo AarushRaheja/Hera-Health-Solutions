@@ -31,6 +31,13 @@ def user_dashboard(request):
     else:
         all_users = User.objects.filter(id=request.user.id)  # Only show current user
     
+    # Get user_id from query parameters or redirect to first user
+    user_id = request.GET.get('user_id')
+    if not user_id:
+        first_user = User.objects.first()
+        if first_user:
+            return redirect('dashboard:user_page', user_id=first_user.id)
+    
     if request.method == 'POST':
         # Handle file status updates
         for file_id in request.POST.getlist('file_id'):
@@ -51,7 +58,6 @@ def user_dashboard(request):
         'files': None,
         'all_files': json.dumps(list(all_files)),
         'all_profiles': all_users,
-        #'first_load': True
     })
 
 @csrf_exempt
