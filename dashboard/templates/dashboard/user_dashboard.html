@@ -806,7 +806,7 @@
                     <div class="members-list">
                         {% for profile in all_profiles %}
                             <div class="profile-card">
-                                <button class="profile-btn" onclick="window.location.href=`{% url 'dashboard:user_page' user_id=profile.id %}?first_load=false`">
+                                <button class="profile-btn" onclick="window.location.href=`{% url 'dashboard:user_page' user_id=profile.id %}`">
                                     <div class="profile-info">
                                         <div class="profile-avatar">
                                             <span class="avatar-initials">
