@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onboarding Files System Guideline</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #333;
+            margin-top: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .note {
+            background: #f5f5f5;
+            padding: 15px;
+            border-left: 4px solid #2563eb;
+            margin: 15px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        code {
+            background: #f5f5f5;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        .button {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .button:hover {
+            background: #1d4ed8;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .button-group .button {
+            flex: 1;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .table th, .table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .table th {
+            background: #f5f5f5;
+        }
+        .code-block {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Onboarding Files System Guideline</h1>
+    
+    <div class="section">
+        <h2>Introduction</h2>
+        <p>This guide provides comprehensive instructions for using the Onboarding Files System, a web-based platform for file management and user access control.</p>
+    </div>
+
+    <div class="section">
+        <h2>Getting Started</h2>
+        <h3>Login</h3>
+        <ol>
+            <li>Access the application through your web browser.</li>
+            <li>Enter your username and password.</li>
+            <li>Click the "Login" button.</li>
+        </ol>
+        <div class="note">
+            <p><strong>Note:</strong> If you don't have an account, contact your administrator to create one.</p>
+        </div>
+
+        <h3>Dashboard Interface</h3>
+        <p>The dashboard consists of two main sections:</p>
+        <ol>
+            <li><strong>Left Panel (User Panel):</strong> Contains user profiles and navigation options.</li>
+            <li><strong>Main Content Area:</strong> Displays files, actions, and user management options.</li>
+        </ol>
+
+        <h3>Common Buttons and Their Functions</h3>
+        <div class="button-group">
+            <button class="button">Add Files</button>
+            <button class="button">Upload Files</button>
+            <button class="button">Assign Files</button>
+            <button class="button">Delete Files</button>
+        </div>
+
+        <div class="table">
+            <table>
+                <tr>
+                    <th>Button</th>
+                    <th>Function</th>
+                    <th>Required Permissions</th>
+                    <th>Common Usage</th>
+                </tr>
+                <tr>
+                    <td>Add Files</td>
+                    <td>Opens modal to select existing files for assignment</td>
+                    <td>Admin</td>
+                    <td>When assigning files to multiple users</td>
+                </tr>
+                <tr>
+                    <td>Upload Files</td>
+                    <td>Uploads new files to the system</td>
+                    <td>All users</td>
+                    <td>When adding new documents to the system</td>
+                </tr>
+                <tr>
+                    <td>Assign Files</td>
+                    <td>Assigns selected files to specific users</td>
+                    <td>Admin</td>
+                    <td>When distributing documents to team members</td>
+                </tr>
+                <tr>
+                    <td>Delete Files</td>
+                    <td>Removes files from the system</td>
+                    <td>Admin</td>
+                    <td>When cleaning up old or unused files</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Admin Role Features</h2>
+        <h3>User Management</h3>
+        <div class="note">
+            <p>Admins have full control over user profiles and file access.</p>
+        </div>
+        <ul>
+            <li>View all user profiles in the system.</li>
+            <li>Manage user access to files.</li>
+            <li>Monitor file status (viewed/not-viewed).</li>
+            <li>Edit user permissions and roles.</li>
+        </ul>
+
+        <h3>Common Admin Tasks</h3>
+        <div class="button-group">
+            <button class="button">Edit User</button>
+            <button class="button">Assign Files</button>
+            <button class="button">Manage Permissions</button>
+        </div>
+
+        <div class="table">
+            <table>
+                <tr>
+                    <th>Task</th>
+                    <th>Steps</th>
+                    <th>Potential Issues</th>
+                    <th>Troubleshooting</th>
+                </tr>
+                <tr>
+                    <td>Edit User Profile</td>
+                    <td>
+                        <ol>
+                            <li>Select user from left panel</li>
+                            <li>Click "Edit" button</li>
+                            <li>Update profile information</li>
+                            <li>Save changes</li>
+                        </ol>
+                    </td>
+                    <td>
+                        <ul>
+                            <li>Permission errors</li>
+                            <li>Missing required fields</li>
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            <li>Check admin permissions</li>
+                            <li>Verify all required fields</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Assign Files</td>
+                    <td>
+                        <ol>
+                            <li>Select files to assign</li>
+                            <li>Choose target users</li>
+                            <li>Set initial status</li>
+                            <li>Complete assignment</li>
+                        </ol>
+                    </td>
+                    <td>
+                        <ul>
+                            <li>File size limits</li>
+                            <li>Invalid file types</li>
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            <li>Check file size restrictions</li>
+                            <li>Verify supported file formats</li>
+                        </ul>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <h3>File Management</h3>
+        <ul>
+            <li>Upload new files to the system.</li>
+            <li>Assign files to specific users.</li>
+            <li>View and manage all uploaded files.</li>
+            <li>Delete files from the system.</li>
+            <li>Monitor file access statistics.</li>
+        </ul>
+
+        <h3>File Upload Best Practices</h3>
+        <div class="note">
+            <p>When uploading files:</p>
+            <ul>
+                <li>Use descriptive filenames</li>
+                <li>Organize files by category</li>
+                <li>Monitor file size limits</li>
+                <li>Verify file formats</li>
+            </ul>
+        </div>
+
+        <h3>File Assignment</h3>
+        <ol>
+            <li>Click on the "Assign Files" button.</li>
+            <li>Select files from existing uploads or upload new files.</li>
+            <li>Choose users to assign the files to.</li>
+            <li>Set initial file status (not-viewed).</li>
+            <li>Click "Assign" to complete the process.</li>
+        </ol>
+
+        <div class="warning">
+            <p>Important: When deleting files, ensure they are not currently in use by other users.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>User Role Features</h2>
+        <h3>Profile Management</h3>
+        <ul>
+            <li>View and edit personal profile information.</li>
+            <li>Update contact details.</li>
+            <li>Change password.</li>
+            <li>View access history.</li>
+        </ul>
+
+        <h3>Common User Tasks</h3>
+        <div class="button-group">
+            <button class="button">Edit Profile</button>
+            <button class="button">View Files</button>
+            <button class="button">Mark as Viewed</button>
+        </div>
+
+        <div class="table">
+            <table>
+                <tr>
+                    <th>Task</th>
+                    <th>Steps</th>
+                    <th>Potential Issues</th>
+                    <th>Troubleshooting</th>
+                </tr>
+                <tr>
+                    <td>Edit Profile</td>
+                    <td>
+                        <ol>
+                            <li>Click "Edit Profile"</li>
+                            <li>Update information</li>
+                            <li>Save changes</li>
+                        </ol>
+                    </td>
+                    <td>
+                        <ul>
+                            <li>Missing required fields</li>
+                            <li>Invalid email format</li>
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            <li>Fill all required fields</li>
+                            <li>Verify email format</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td>View Files</td>
+                    <td>
+                        <ol>
+                            <li>Access file list</li>
+                            <li>Filter by status</li>
+                            <li>Download files</li>
+                        </ol>
+                    </td>
+                    <td>
+                        <ul>
+                            <li>Access denied</li>
+                            <li>File not found</li>
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            <li>Contact admin for access</li>
+                            <li>Verify file permissions</li>
+                        </ul>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <h3>File Access</h3>
+        <ul>
+            <li>View files assigned to you.</li>
+            <li>Mark files as viewed/not-viewed.</li>
+            <li>Download assigned files.</li>
+            <li>Track access history.</li>
+        </ul>
+
+        <h3>File Status</h3>
+        <p>Files will show their status as either:</p>
+        <ul>
+            <li><strong>Not Viewed:</strong> Files that haven't been accessed yet.</li>
+            <li><strong>Viewed:</strong> Files that have been accessed.</li>
+        </ul>
+
+        <div class="note">
+            <p>File status automatically updates when you open a file.</p>
+        </div>
+
+        <h3>Common Issues and Solutions</h3>
+        <div class="table">
+            <table>
+                <tr>
+                    <th>Issue</th>
+                    <th>Solution</th>
+                </tr>
+                <tr>
+                    <td>Cannot access file</td>
+                    <td>Contact admin to check permissions</td>
+                </tr>
+                <tr>
+                    <td>File not showing up</td>
+                    <td>Refresh page or contact admin</td>
+                </tr>
+                <tr>
+                    <td>File download fails</td>
+                    <td>Check internet connection or try again</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>System Features</h2>
+        <h3>File Upload</h3>
+        <div class="note">
+            <p>File upload supports multiple files and drag-and-drop functionality.</p>
+        </div>
+        <ol>
+            <li>Click the "Upload Files" button.</li>
+            <li>Select files from your computer.</li>
+            <li>Drag and drop files into the designated area.</li>
+            <li>Click "Upload" to complete the process.</li>
+        </ol>
+
+        <h3>File Upload Restrictions</h3>
+        <div class="warning">
+            <p>Important file upload limitations:</p>
+            <ul>
+                <li>Maximum file size: 100MB per file</li>
+                <li>Supported formats: PDF, DOCX, XLSX, TXT, JPG, PNG</li>
+                <li>Maximum uploads: 10 files per session</li>
+            </ul>
+        </div>
+
+        <h3>File Search</h3>
+        <p>Use the search bar to:</p>
+        <ul>
+            <li>Search for files by name.</li>
+            <li>Filter files by status.</li>
+            <li>View file details (size, upload date).</li>
+            <li>Sort files by date or name.</li>
+        </ul>
+
+
+        <h3>File Actions</h3>
+        <ul>
+            <li>View file details.</li>
+            <li>Download files.</li>
+            <li>Delete files (Admin only).</li>
+            <li>Assign files to users (Admin only).</li>
+            <li>Mark files as viewed/not-viewed.</li>
+        </ul>
+
+        <h3>File Management Best Practices</h3>
+        <div class="code-block">
+            <pre><code>
+1. Use descriptive filenames
+2. Organize files by category
+3. Regularly clean up unused files
+4. Maintain consistent naming conventions
+5. Document file purposes
+            </code></pre>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Best Practices</h2>
+        <h3>Security</h3>
+        <ul>
+            <li>Keep your login credentials secure.</li>
+            <li>Log out when using a shared computer.</li>
+            <li>Regularly update your password.</li>
+        </ul>
+
+        <h3>File Management</h3>
+        <ul>
+            <li>Organize files with meaningful names.</li>
+            <li>Regularly clean up unused files.</li>
+            <li>Use the search feature for quick access.</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Troubleshooting</h2>
+        <h3>Common Issues</h3>
+        <ul>
+            <li><strong>Cannot access files:</strong> Contact your administrator to check permissions.</li>
+            <li><strong>Upload issues:</strong> Ensure files are in supported formats and not too large.</li>
+            <li><strong>Login problems:</strong> Reset password through the "Forgot Password" link.</li>
+        </ul>
+    </div>
+
+
+
+   
+
+</body>
+</html>
