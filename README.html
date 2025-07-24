@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onboarding Files System Setup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        code {
+            background-color: #f5f5f5;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Onboarding Files System Setup</h1>
+        <p>This is a Django-based user dashboard application for file management and user access control.</p>
+
+        <h2>Prerequisites</h2>
+        <ul>
+            <li>Python 3.8 or higher</li>
+            <li>Conda (Anaconda or Miniconda)</li>
+            <li>Git (for version control)</li>
+        </ul>
+
+        <h2>Setting Up the Development Environment</h2>
+
+        <h3>Create a Conda Environment</h3>
+        <pre><code># Create a new conda environment named 'user-dashboard'
+conda create -n user-dashboard python=3.9
+
+# Activate the environment
+conda activate user-dashboard</code></pre>
+
+        <h3>Install Required Packages</h3>
+        <pre><code># Install pip if not already installed
+conda install pip
+
+# Install the required packages from requirements.txt
+pip install -r requirements.txt</code></pre>
+
+        <h3>Database Setup</h3>
+        <p>- The project uses PostgreSQL as the database backend<br>
+        - Install PostgreSQL if not already installed<br>
+        - Create a database for the project<br>
+        - Update the database settings in <code>settings.py</code> with your database credentials</p>
+
+        <h3>Environment Variables</h3>
+        <p>Create a <code>.env</code> file in the project root directory and add your database credentials:</p>
+        <pre><code>DATABASE_NAME=your_database_name
+DATABASE_USER=your_database_user
+DATABASE_PASSWORD=your_database_password
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+SECRET_KEY=your_django_secret_key</code></pre>
+
+        <h2>Running the Project</h2>
+
+        <h3>Apply Database Migrations</h3>
+        <pre><code>python manage.py makemigrations
+python manage.py migrate</code></pre>
+
+        <h3>Create a Superuser (Optional)</h3>
+        <pre><code>python manage.py createsuperuser</code></pre>
+
+        <h3>Run the Development Server</h3>
+        <pre><code>python manage.py runserver</code></pre>
+
+        <h3>Access the Application</h3>
+        <p>- Open your web browser and navigate to <code>http://localhost:8000</code><br>
+        - The dashboard should be accessible at this URL</p>
+
+        <h2>Project Structure</h2>
+        <pre><code>user_dashboard_project/
+├── dashboard/
+│   ├── templates/
+│   │   └── dashboard/
+│   │       └── user_dashboard.html
+│   ├── models.py
+│   ├── views.py
+│   └── urls.py
+├── add_user_data.py
+├── requirements.txt
+└── README.md</code></pre>
+
+        <h2>Features</h2>
+        <ul>
+            <li>User profile management</li>
+            <li>File upload and management</li>
+            <li>File assignment to users</li>
+            <li>File status tracking (viewed/not viewed)</li>
+            <li>Modern and responsive UI</li>
+            <li>Secure file access control</li>
+        </ul>
+
+        <h2>Contributing</h2>
+        <ol>
+            <li>Fork the repository</li>
+            <li>Create your feature branch</li>
+            <li>Commit your changes</li>
+            <li>Push to the branch</li>
+            <li>Create a new Pull Request</li>
+        </ol>
+
+        <h2>License</h2>
+        <p>This project is licensed under the MIT License - see the LICENSE file for details.</p>
+    </div>
+</body>
+</html>
