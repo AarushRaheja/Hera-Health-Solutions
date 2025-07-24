@@ -52,6 +52,11 @@ class UploadedFile(models.Model):
         null=True,
         blank=True
     )
+    file_content = models.BinaryField(
+        null=True,
+        blank=True,
+        help_text="The actual content of the uploaded file"
+    )
 
     class Meta:
         db_table = 'dashboard_uploaded_files'

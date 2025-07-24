@@ -98,7 +98,14 @@ def upload_files(request):
 
 @login_required
 def serve_file(request, filename):
-    file_path = os.path.join(settings.MEDIA_ROOT, 'files', filename)
+    # First check if it's a user-uploaded file
+    try:
+        uploaded_file = UploadedFile.objects.get(file_name=filename, user=request.user)
+        file_path = os.path.join(settings.MEDIA_ROOT, uploaded_file.file_path)
+    except UploadedFile.DoesNotExist:
+        # If not a user-uploaded file, check the regular files directory
+        file_path = os.path.join(settings.MEDIA_ROOT, 'files', filename)
+    
     if os.path.exists(file_path):
         with open(file_path, 'rb') as f:
             response = HttpResponse(f.read())
@@ -236,18 +243,24 @@ def upload_user_file(request):
                 file_path = os.path.join(user_upload_dir, f"{base}_{counter}{ext}")
                 counter += 1
             
+            # Read the file content
+            file_content = b''
+            for chunk in uploaded_file.chunks():
+                file_content += chunk
+            
+            # Save file to disk
             with open(file_path, 'wb+') as destination:
-                for chunk in uploaded_file.chunks():
-                    destination.write(chunk)
+                destination.write(file_content)
             
             # Get just the filename (without path) for storage in the database
             filename = os.path.basename(file_path)
             
-            # Create UploadedFile record with the actual filename used
+            # Create UploadedFile record with the actual filename and content
             uploaded = UploadedFile.objects.create(
                 user=request.user,
                 file_name=filename,
-                file_path=os.path.join('user_uploads', str(request.user.id), filename)
+                file_path=os.path.join('user_uploads', str(request.user.id), filename),
+                file_content=file_content
             )
             
             return JsonResponse({
