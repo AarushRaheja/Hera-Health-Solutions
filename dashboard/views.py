@@ -210,6 +210,18 @@ def upload_user_file(request):
         try:
             uploaded_file = request.FILES['file']
             
+            # Check if user has already uploaded a file with the same name
+            existing_file = UploadedFile.objects.filter(
+                user=request.user,
+                file_name=uploaded_file.name
+            ).first()
+            
+            if existing_file:
+                return JsonResponse({
+                    'success': False,
+                    'error': f'You have already uploaded a file named "{uploaded_file.name}"'
+                }, status=400)
+            
             # Create user-specific directory if it doesn't exist
             user_upload_dir = os.path.join(settings.MEDIA_ROOT, 'user_uploads', str(request.user.id))
             os.makedirs(user_upload_dir, exist_ok=True)
