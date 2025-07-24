@@ -633,9 +633,8 @@
                         const files = e.target.files;
                         if (files.length > 0) {
                             const formData = new FormData();
-                            for (let i = 0; i < files.length; i++) {
-                                formData.append('files', files[i]);
-                            }
+                            // Only process the first file since we're doing single file upload
+                            formData.append('file', files[0]);
 
                             // Show loading state
                             const originalText = uploadButton.innerHTML;
@@ -643,7 +642,7 @@
                             uploadButton.disabled = true;
 
                             // Send files to server
-                            fetch('/api/upload-files/', {
+                            fetch('{% url "dashboard:upload_user_file" %}', {
                                 method: 'POST',
                                 headers: {
                                     'X-CSRFToken': '{{ csrf_token }}'
@@ -653,11 +652,11 @@
                             .then(response => response.json())
                             .then(data => {
                                 if (data.success) {
-                                    alert('Files uploaded successfully!');
-                                    // Refresh the page to show the new files
+                                    alert('File uploaded successfully!');
+                                    // Refresh the page to show the new file
                                     window.location.reload();
                                 } else {
-                                    throw new Error(data.error || 'Failed to upload files');
+                                    throw new Error(data.error || 'Failed to upload file');
                                 }
                             })
                             .catch(error => {

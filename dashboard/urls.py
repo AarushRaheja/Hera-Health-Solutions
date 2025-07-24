@@ -12,4 +12,5 @@ urlpatterns = [
     path('dashboard/files/<str:filename>/', views.serve_file, name='serve_file'),
     path('dashboard/delete/<str:filename>/', views.delete_file, name='delete_file'),
     path('dashboard/delete-assigned/<int:user_id>/<str:filename>/', views.delete_assigned_file, name='delete_assigned_file'),
+    path('api/upload-user-file/', views.upload_user_file, name='upload_user_file'),
 ]

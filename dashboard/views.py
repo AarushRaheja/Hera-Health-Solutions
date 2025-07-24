@@ -11,7 +11,7 @@ import os
 from datetime import datetime
 from django.template.loader import render_to_string
 from django.core.files.storage import default_storage
-from .models import File, DashboardFileUser
+from .models import File, DashboardFileUser, UploadedFile
 
 
 # Custom form for editing user profile
@@ -198,6 +198,66 @@ def user_profile(request):
     return redirect('dashboard:user_page', user_id=request.user.id)
 
 @login_required
+@csrf_exempt
+@login_required
+def upload_user_file(request):
+    """
+    Handle file uploads from non-superuser dashboard.
+    Saves the uploaded file to the UploadedFile model.
+    """
+    print(request.FILES)
+    if request.method == 'POST' and request.FILES.get('file'):
+        try:
+            uploaded_file = request.FILES['file']
+            
+            # Create user-specific directory if it doesn't exist
+            user_upload_dir = os.path.join(settings.MEDIA_ROOT, 'user_uploads', str(request.user.id))
+            os.makedirs(user_upload_dir, exist_ok=True)
+            
+            # Save file to user's directory
+            file_path = os.path.join(user_upload_dir, uploaded_file.name)
+            
+            # Handle duplicate filenames by adding a timestamp
+            base, ext = os.path.splitext(uploaded_file.name)
+            counter = 1
+            while os.path.exists(file_path):
+                file_path = os.path.join(user_upload_dir, f"{base}_{counter}{ext}")
+                counter += 1
+            
+            with open(file_path, 'wb+') as destination:
+                for chunk in uploaded_file.chunks():
+                    destination.write(chunk)
+            
+            # Get just the filename (without path) for storage in the database
+            filename = os.path.basename(file_path)
+            
+            # Create UploadedFile record with the actual filename used
+            uploaded = UploadedFile.objects.create(
+                user=request.user,
+                file_name=filename,
+                file_path=os.path.join('user_uploads', str(request.user.id), filename)
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'file': {
+                    'id': uploaded.id,
+                    'name': uploaded.file_name,
+                    'upload_date': uploaded.upload_date.isoformat()
+                }
+            })
+            
+        except Exception as e:
+            return JsonResponse(
+                {'success': False, 'error': str(e)}, 
+                status=500
+            )
+    
+    return JsonResponse(
+        {'success': False, 'error': 'No file provided'}, 
+        status=400
+    )
+
 def user_page(request, user_id):
     profile = get_object_or_404(User, id=user_id)
     all_files = File.objects.all().values('id', 'name', 'upload_date')
