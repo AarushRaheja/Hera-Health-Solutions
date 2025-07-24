@@ -5,6 +5,7 @@ app_name = 'dashboard'
 
 urlpatterns = [
     path('', views.user_dashboard, name='user_dashboard'),
+    path('profile/', views.user_profile, name='user_profile'),
     path('user/<int:user_id>/', views.user_page, name='user_page'),
     path('api/assign-files/', views.assign_files, name='assign_files'),
     path('api/upload-files/', views.upload_files, name='upload_files'),

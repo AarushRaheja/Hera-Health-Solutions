@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django import forms
 from django.http import JsonResponse, HttpResponse
@@ -31,12 +32,10 @@ def user_dashboard(request):
     else:
         all_users = User.objects.filter(id=request.user.id)  # Only show current user
     
-    # Get user_id from query parameters or redirect to first user
+    # Redirect to the current user's profile if no user_id is specified
     user_id = request.GET.get('user_id')
     if not user_id:
-        first_user = User.objects.first()
-        if first_user:
-            return redirect('dashboard:user_page', user_id=first_user.id)
+        return redirect('dashboard:user_page', user_id=request.user.id)
     
     if request.method == 'POST':
         # Handle file status updates
@@ -192,6 +191,11 @@ def delete_assigned_file(request, filename, user_id):
             return JsonResponse({'success': True, 'message': 'File assignment removed'})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+@login_required
+def user_profile(request):
+    """View that redirects to the current user's profile page."""
+    return redirect('dashboard:user_page', user_id=request.user.id)
 
 @login_required
 def user_page(request, user_id):
