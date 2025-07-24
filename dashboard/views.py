@@ -324,10 +324,12 @@ def delete_uploaded_file(request, file_id):
         }, status=500)
 
 def user_page(request, user_id):
+    # Redirect non-superusers trying to access other users' profiles
+    if not request.user.is_superuser and request.user.id != user_id:
+        return redirect('dashboard:user_page', user_id=request.user.id)
+        
     profile = get_object_or_404(User, id=user_id)
     all_files = File.objects.all().values('id', 'name', 'upload_date')
-    
-    # ... (rest of the code remains the same)
     file_user_entries = DashboardFileUser.objects.filter(
         user_id=user_id
     ).select_related('file').values(
