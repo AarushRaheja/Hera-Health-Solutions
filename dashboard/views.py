@@ -266,14 +266,49 @@ def upload_user_file(request):
             )
     
     return JsonResponse(
-        {'success': False, 'error': 'No file provided'}, 
+        {'success': False, 'error': 'No file was uploaded.'},
         status=400
     )
+
+@login_required
+def delete_uploaded_file(request, file_id):
+    try:
+        # Get the file or return 404 if not found
+        uploaded_file = get_object_or_404(UploadedFile, id=file_id)
+        
+        # Check if the user is the owner or a superuser
+        if request.user != uploaded_file.user and not request.user.is_superuser:
+            return JsonResponse({
+                'success': False,
+                'error': 'You do not have permission to delete this file.'
+            }, status=403)
+        
+        # Get the file path before deleting the record
+        file_path = uploaded_file.file_path
+        
+        # Delete the database record
+        uploaded_file.delete()
+        
+        # Delete the actual file from storage
+        if default_storage.exists(file_path):
+            default_storage.delete(file_path)
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'File deleted successfully.'
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
 
 def user_page(request, user_id):
     profile = get_object_or_404(User, id=user_id)
     all_files = File.objects.all().values('id', 'name', 'upload_date')
-    # Get files assigned to this profile through DashboardFileUser
+    
+    # ... (rest of the code remains the same)
     file_user_entries = DashboardFileUser.objects.filter(
         user_id=user_id
     ).select_related('file').values(
@@ -293,6 +328,31 @@ def user_page(request, user_id):
         }
         for f in file_user_entries
     ]
+    
+    # Get submitted files for this user from UploadedFile model
+    submitted_files = UploadedFile.objects.filter(
+        user_id=user_id
+    ).values(
+        'id',
+        'file_name',
+        'upload_date',
+        'file_path'
+    ).order_by('-upload_date')
+    
+    # Convert to a list of dictionaries with consistent field names
+    submitted_files = [
+        {
+            'id': f['id'],
+            'name': f['file_name'],  # Use the actual field name from the model
+            'upload_date': f['upload_date'],
+            'file_path': f['file_path']
+        }
+        for f in submitted_files
+    ]
+    
+    # Format the upload date for display
+    for file in submitted_files:
+        file['upload_date'] = file['upload_date'].strftime('%Y-%m-%d %H:%M')
     
     # Handle user profile form
     if request.method == 'POST' and 'edit_profile' in request.POST:
@@ -330,6 +390,7 @@ def user_page(request, user_id):
         'profile': profile,
         'profile_form': form,
         'files': files,
+        'submitted_files': submitted_files,
         'all_files': json.dumps(list(all_files)),
         'all_profiles': all_users,
         'profile_id': user_id
