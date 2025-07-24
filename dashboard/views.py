@@ -100,7 +100,13 @@ def upload_files(request):
 def serve_file(request, filename):
     # First check if it's a user-uploaded file
     try:
-        uploaded_file = UploadedFile.objects.get(file_name=filename, user=request.user)
+        if request.user.is_superuser:
+            # For superusers, get the file without user restriction
+            uploaded_file = UploadedFile.objects.get(file_name=filename)
+        else:
+            # For regular users, only get their own files
+            uploaded_file = UploadedFile.objects.get(file_name=filename, user=request.user)
+            
         file_path = os.path.join(settings.MEDIA_ROOT, uploaded_file.file_path)
     except UploadedFile.DoesNotExist:
         # If not a user-uploaded file, check the regular files directory
