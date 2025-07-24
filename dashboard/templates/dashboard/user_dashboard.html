@@ -1267,6 +1267,69 @@
             window.open(`/dashboard/files/${filename}`, '_blank');
         }
 
+        // Function to delete an uploaded file
+        function deleteUploadedFile(fileId) {
+            if (!confirm('Are you sure you want to delete this file? This action cannot be undone.')) {
+                return;
+            }
+
+            // Get the button element to show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Deleting...';
+
+            // Get CSRF token from cookies
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            const csrftoken = getCookie('csrftoken');
+
+            // Send DELETE request to the server
+            fetch(`/api/delete-uploaded-file/${fileId}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove the file item from the UI
+                    const fileItem = button.closest('.file-item');
+                    fileItem.style.opacity = '0.5';
+                    fileItem.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => {
+                        fileItem.remove();
+                        
+                        // Show success message
+                        alert('File deleted successfully!');
+                    }, 300);
+                } else {
+                    throw new Error(data.error || 'Failed to delete file');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting file:', error);
+                alert('Error deleting file: ' + (error.message || 'Unknown error occurred'));
+                button.disabled = false;
+                button.innerHTML = originalText;
+            });
+        }
+
         function handleAddFiles() {
             // Get all selected files
             const selectedExisting = Array.from(document.querySelectorAll('.existing-files-grid .file-card.selected'))
